@@ -15,9 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    
-    - name: Set test variable
-      id: set-variable
+
+    - name: Set build vars
+      id: set-build-vars
       run: |
         if [ ${{ github.ref }} == 'refs/heads/main' ]; then
           echo "RELEASE_VERSION=latest" >> $GITHUB_ENV
@@ -34,17 +34,17 @@ jobs:
         go-version: 1.19
 
     - name: Login to GitHub Container Registry
-      if: env.IMAGE_TAG != 'dev'
+      if: env.RELEASE_VERSION != 'dev'
       uses: docker/login-action@v2
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-#     - name: Build
-#       run: make docker-build
-#       env:
-#         IMG: ghcr.io/topicuskeyhub/keyhub-vault-operator:latest
+    - name: Build
+      run: make docker-build
+      env:
+        IMG: ghcr.io/topicuskeyhub/keyhub-vault-operator:${env.RELEASE_VERSION}
 
 #     - name: Push to GitHub Container Registry
 #       if: startsWith(github.ref, 'refs/heads/main') || startsWith(github.ref, 'refs/heads/release/')
